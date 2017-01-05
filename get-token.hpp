@@ -5,7 +5,7 @@
 namespace KaleidescopeLang
 {
 
-Token *get_token();
+Token *get_token(const char *buffer, size_t *tok_end);
 
 }
 

@@ -11,32 +11,41 @@ struct Token
 {
   enum Tag : signed char
   {
-    tok_eof = -1,
+    eof = -1,
 
     // commands
-    tok_def = -2,
-    tok_extern = -3,
+    def = -2,
+    k_extern = -3,
 
     // primary
-    tok_identifier = -4,
-    tok_number = -5,
+    identifier = -4,
+    number = -5,
+    comment = -6,
   } tag;
 
   Token(Tag tag) : tag(tag) {}
+  virtual ~Token() {}
+};
+
+struct Comment : public Token
+{
+  String content;
+
+  Comment(String content) : Token(comment), content(content) {}
 };
 
 struct Identifier : public Token
 {
   String name;
 
-  Identifier(String name) : Token(tok_identifier), name(name) {}
+  Identifier(String name) : Token(identifier), name(name) {}
 };
 
 struct Numeral : public Token
 {
   double value;
 
-  Numeral(double value) : Token(tok_number), value(value) {}
+  Numeral(double value) : Token(number), value(value) {}
 };
 
 } // namespace KaleidescopeLang

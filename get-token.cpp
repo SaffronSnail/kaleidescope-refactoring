@@ -1,75 +1,63 @@
 #include "get-token.hpp"
 
-#include <stdio.h>
+#include <cassert>
 #include <cctype>
-#include <cstdlib>
 
 namespace KaleidescopeLang
 {
 
 template <typename Predicate>
-static char slurp(String &buffer, Predicate p)
+static size_t slurp(const char *buffer, Predicate p)
 {
-  char next;
-  for (next = getchar();
-       p(next);
-       buffer += next
+  size_t end = 0;
+
+  for (char current = *(buffer + end);
+       current != '\0' && p(current);
+       ++end
       );
-  return next;
+  
+  return end;
 }
 
-
-Token *get_token()
+Token *get_token(const char *buffer, size_t *tok_end)
 {
-  static char last_character = ' ';
-
   // skip any whitespace
-  while (isspace(last_character))
-    last_character = getchar();
+  while (isspace(*buffer))
+    ++buffer;
 
-  if (isalpha(last_character)) // identifier: [a-zA-z][a-zA-Z0-9]*
+  if (*buffer == '\0')
+    return new Token(Token::eof);
+  else if (isalpha(*buffer)) // identifier: [a-zA-z][a-zA-Z0-9]*
   {
-    String identifier(last_character);
-    last_character = slurp(identifier, isalnum);
-
+    *tok_end = slurp(buffer, isalnum);
+    String identifier(buffer, *tok_end);
     if (identifier == "def")
-      return new Token(Token::tok_def);
+      return new Token(Token::def);
     else if (identifier == "extern")
-      return new Token(Token::tok_extern);
+      return new Token(Token::k_extern);
     else
       return new Identifier(identifier);
   }
-  else if (isdigit(last_character) || last_character == '.') // Number: [0-9.]+
+  else if (isdigit(*buffer) || *buffer == '.') // Number: [0-9.]+
   {
-    String num_str(last_character);
-#   warning 1.23.45 will be improperly read as the numerals .123 and .45
-
+#   warning parsing bug: 1.23.45 will be improperly read as the numerals 1.23 and .45
     auto predicate = [] (char c) { return isdigit(c) || c == '.'; };
-    last_character = slurp(num_str, predicate);
-    return new Numeral(strtod(num_str.c_str(), 0));
+    *tok_end = slurp(buffer, predicate);
+    return new Numeral(strtod(String(buffer, *tok_end).c_str(),
+                              0)
+                      );
+  }
+  else if (*buffer == '#')
+  {
+    // comment until end of line
+    auto predicate = [] (char c) { return c != EOF && c != '\n' && c != '\r'; };
+    *tok_end = slurp(buffer, predicate);
+    return new Comment(String(buffer, *tok_end));
   }
   else
   {
-    if (last_character == '#')
-    {
-      // comment until end of line
-      do
-        last_character = getchar();
-      while (last_character != EOF && last_character != '\n' &&
-                                      last_character != '\r'
-            );
-
-      if (last_character != EOF)
-        return get_token();
-    }
-
-    // Check for end of file. Don't eat the EOF
-    if (last_character == EOF)
-      return new Token(Token::tok_eof);
-
-    char this_character = last_character;
-    last_character = getchar();
-    return new Token((Token::Tag)this_character);
+    *tok_end = 1;
+    return new Token((Token::Tag)*buffer);
   }
 }
 
