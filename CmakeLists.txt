@@ -1,0 +1,12 @@
+cmake_minimum_required (VERSION 3.7)
+project(kaleidoscope-refactoring)
+
+include_directories(. abstract-syntax-tree log)
+
+add_subdirectory(log)
+
+add_subdirectory(abstract-syntax-tree)
+add_library(arbitrary-buffer arbitrary-buffer.cpp arbitrary-buffer.hpp)
+add_library(tokenizer get-token.cpp get-token.hpp token.hpp)
+
+add_library(parser parser.cpp parser.hpp)
