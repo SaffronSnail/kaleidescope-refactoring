@@ -1,5 +1,12 @@
 #pragma once
 
-#include <string>
+#include "string.hpp"
 
-void log_error(std::string message);
+namespace Kaleidoscope
+{
+namespace Log
+{
+void log_error(String message);
+}
+}
+
