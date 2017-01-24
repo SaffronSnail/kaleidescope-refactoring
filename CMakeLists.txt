@@ -5,4 +5,5 @@ include_directories(.)
 
 add_subdirectory(lexer)
 add_subdirectory(log)
+add_subdirectory(parse)
 
