@@ -42,6 +42,6 @@ public:
   virtual SourceIterator *copy() const = 0;
 };
 
-}
-}
+} // namespace Lexer
+} // namespace Kaleidoscope
 
