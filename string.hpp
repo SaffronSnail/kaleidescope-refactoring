@@ -5,5 +5,5 @@
 namespace Kaleidoscope
 {
   typedef std::string String;
-}
+} // namespace Kaleidoscope
 

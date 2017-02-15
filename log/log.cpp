@@ -10,6 +10,6 @@ void log_error(std::string message)
 {
   std::cerr << message << std::endl;
 }
-}
-}
+} // namespace Log
+} // namespace Kaleidoscope
 

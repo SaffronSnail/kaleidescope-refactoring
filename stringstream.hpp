@@ -5,5 +5,5 @@
 namespace Kaleidoscope
 {
   typedef std::stringstream StringStream;
-}
+} // namespace Kaleidoscope
 
