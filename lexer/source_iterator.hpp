@@ -40,6 +40,8 @@ public:
   virtual SourceIterator *previous() = 0;
 
   virtual SourceIterator *copy() const = 0;
+
+  virtual bool equal(const SourceIterator *) const = 0;
 };
 
 } // namespace Lexer

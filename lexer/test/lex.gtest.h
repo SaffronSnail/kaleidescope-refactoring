@@ -1,43 +1,74 @@
 #pragma once
 
-#include "../lex.hpp"
-using Kaleidoscope::Lexer;
+#include "lexer/lex.hpp"
+using namespace Kaleidoscope::Lexer;
 
+#include "lexer/identifier.hpp"
+#include "lexer/number.hpp"
+
+#include "gtest/gtest.h"
 #include <string>
+
+std::ostream &operator<<(std::ostream &os, const Token &tok)
+{
+  os << "Token of type " << tok.type;
+  return os;
+}
 
 typedef std::string String;
 
 class StringSource : public SourceIterator
 {
 public:
-  StringSource(String str) : source(str), pos(source.begin())
+  StringSource(String str) : source(str), pos(0)
   {}
 
-  virtual char operator*()
+  virtual char operator*() const
   {
-    return *pos;
+    return source[pos];
   }
 
   virtual SourceIterator *next()
   {
-    ++pos;
+    if (pos < source.length())
+      ++pos;
     return this;
   }
 
   virtual SourceIterator *previous()
   {
-    --pos;
+    if (pos > 0)
+      --pos;
     return this;
   }
 
   virtual SourceIterator *copy() const
   {
-    return new SourceIterator(source);
+    return new StringSource(source);
+  }
+
+  StringSource end() const
+  {
+    StringSource other(source);
+    other.pos = source.length();
+    return other;
+  }
+
+  virtual bool equal(const SourceIterator *other_as_parent) const
+  {
+    const StringSource *other =
+      dynamic_cast<const StringSource *>(other_as_parent);
+
+    if (other == nullptr)
+      return false;
+    else
+      return source == other->source &&
+             pos == other->pos;
   }
 
 private:
-  String source;
-  String::const_iterator pos;
+  const String source;
+  size_t pos;
 };
 
 // this is useful when you have a string that you want to parse one token
@@ -46,8 +77,11 @@ private:
 #define SIMPLE_TOKEN_TEST(test_name, string_to_parse, expected_token)\
   TEST(lexer, test_name)\
   {\
-    StringIterator test_target(string_to_parse);\
-    EXPECT_EQ(expected_token, *lex(test_target, test_target.end()));\
+    StringSource test_target(string_to_parse);\
+    StringSource end = test_target.end();\
+    Token *result = lex(&test_target, &end);\
+    auto expected = expected_token;\
+    EXPECT_TRUE(equivalent_tokens(&expected, result)) << "expected is " << to_string(expected.type) << ", actual is " << to_string(result->type) << "\n";\
   }
 
 static const Token end_tok = Token(Token::Type::eof);

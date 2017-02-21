@@ -1,5 +1,7 @@
 #pragma once
 
+#include "string.hpp"
+
 namespace Kaleidoscope
 {
 namespace Lexer
@@ -14,7 +16,7 @@ struct Token
    * derives from signed int, so that an optimizatnoi doesn't make the assignment
    * of a character to this variable error-prone);
    */
-  enum Type : signed int
+  enum class Type : signed int
   {
     eof = -1,
 
@@ -28,7 +30,12 @@ struct Token
 
   Token(Type t) : type(t)
   {}
+
+  virtual bool equal(const Token *other) const;
 };
+
+bool equivalent_tokens(const Token *lhs, const Token *rhs);
+String to_string(Token::Type t);
 
 } // namespace Lexer
 } // namespace Kaleidoscope

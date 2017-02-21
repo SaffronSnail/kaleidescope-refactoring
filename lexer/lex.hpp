@@ -20,7 +20,7 @@ namespace Lexer
    * @return a token lexed from the position begin, stopping at position
    * end
    */
-  Token *lex(SourceIterator *begin, SourceIterator *end);
+  Token *lex(SourceIterator *begin, const SourceIterator *end);
 
 } // namespace Lexer
 } // namespace Kaleidoscope

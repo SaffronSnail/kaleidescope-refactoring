@@ -11,10 +11,8 @@ namespace Kaleidoscope
 namespace Lexer
 {
 
-Token *lex(const SourceIterator *begin, const SourceIterator *end)
+Token *lex(SourceIterator *current, const SourceIterator *end)
 {
-  SourceIterator *current = begin->copy();
-
   while (isspace(**current))
     current->next();
 
@@ -51,13 +49,13 @@ Token *lex(const SourceIterator *begin, const SourceIterator *end)
       do
       {
         current->next();
-      } while (current != end && **current != '\n' && **current != '\r');
+      } while (!current->equal(end) && **current != '\n' && **current != '\r');
 
       if (current != end)
         return lex(current, end);
     }
 
-    if (current == end)
+    if (current->equal(end))
       return new Token(Token::Type::eof);
     else
       return new Token(static_cast<Token::Type>(**current));
