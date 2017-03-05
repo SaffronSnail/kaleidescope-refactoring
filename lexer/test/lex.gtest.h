@@ -71,6 +71,9 @@ private:
   size_t pos;
 };
 
+#define TEST_SAME_TOKEN(testtype, expected, result) testtype##_TRUE(equivalent_tokens(expected, result)) << "expected is " << to_string((expected)->type) << ", actual is " << to_string((result)->type) << "\n";
+#define EXPECT_SAME_TOKEN(expected, result) TEST_SAME_TOKEN(EXPECT, expected, result)
+#define ASSERT_SAME_TOKEN(expected, result) TEST_SAME_TOKEN(ASSERT, expected, result)
 // this is useful when you have a string that you want to parse one token
 // out of; it creates the test, lexes once, and expects it to be the specified
 // token
@@ -81,7 +84,7 @@ private:
     StringSource end = test_target.end();\
     Token *result = lex(&test_target, &end);\
     auto expected = expected_token;\
-    EXPECT_TRUE(equivalent_tokens(&expected, result)) << "expected is " << to_string(expected.type) << ", actual is " << to_string(result->type) << "\n";\
+    EXPECT_SAME_TOKEN(&expected, result);\
   }
 
 static const Token end_tok = Token(Token::Type::eof);
@@ -104,4 +107,16 @@ SIMPLE_TOKEN_TEST(parse_alnum_identifier, "f00b4r", Identifier("f00b4r"))
 SIMPLE_TOKEN_TEST(parse_unregistered_character, "<",
                   Token(static_cast<Token::Type>('<'))
 )
+
+TEST(lexer, parses_multiple_tokens)
+{
+  StringSource test_target("  500 anIdentifier another1dent1f1er          # end with a comment");
+  StringSource end = test_target.end();
+  Token *results[] = { new Number(500), new Identifier("anIdentifier"), new Identifier("another1dent1f1er"), new Token(Token::Type::eof) };
+  for (Token *correct_value : results)
+  {
+    Token *received_value = lex(&test_target, &end);
+    EXPECT_SAME_TOKEN(correct_value, received_value);
+  }
+}
 
